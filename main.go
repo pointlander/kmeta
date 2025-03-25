@@ -6,9 +6,48 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/pointlander/kmeta/kmeans"
 )
 
 func main() {
 	iris := Load()
 	fmt.Println(len(iris))
+
+	{
+		input := make([][]float64, len(iris))
+		for i, item := range iris {
+			measures := make([]float64, 4)
+			for j := range measures {
+				measures[j] = item.Measures[j]
+			}
+			input[i] = measures
+		}
+		meta := make([][]float64, len(iris))
+		for i := range meta {
+			meta[i] = make([]float64, len(iris))
+		}
+		k := 3
+		for i := 0; i < 100; i++ {
+			clusters, _, err := kmeans.Kmeans(int64(i+1), input, k, kmeans.SquaredEuclideanDistance, -1)
+			if err != nil {
+				panic(err)
+			}
+			for i := 0; i < len(meta); i++ {
+				target := clusters[i]
+				for j, v := range clusters {
+					if v == target {
+						meta[i][j]++
+					}
+				}
+			}
+		}
+		clusters, _, err := kmeans.Kmeans(1, meta, k, kmeans.SquaredEuclideanDistance, -1)
+		if err != nil {
+			panic(err)
+		}
+		for i := range iris {
+			fmt.Println(clusters[i], iris[i].Label)
+		}
+	}
 }
