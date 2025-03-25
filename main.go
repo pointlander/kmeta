@@ -46,8 +46,14 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		a := make(map[string][3]int)
 		for i := range iris {
-			fmt.Println(clusters[i], iris[i].Label)
+			histogram := a[iris[i].Label]
+			histogram[clusters[i]]++
+			a[iris[i].Label] = histogram
+		}
+		for k, v := range a {
+			fmt.Println(k, v)
 		}
 	}
 }
